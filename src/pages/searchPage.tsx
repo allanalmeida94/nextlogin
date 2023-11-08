@@ -17,6 +17,7 @@ type UsersProps = {
 };
 
 export default function UserPage({ users }: UsersProps) {
+  //layout seaching page
   return (
     <>
       <Flex
@@ -54,6 +55,7 @@ export default function UserPage({ users }: UsersProps) {
   );
 }
 
+// searching for users in the database
 export const getServerSideProps: GetServerSideProps = async () => {
   const users = await prisma.user.findMany();
 

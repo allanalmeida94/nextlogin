@@ -1,9 +1,7 @@
 "use client";
-
 import {
   Box,
   Button,
-  ChakraProvider,
   Link,
   Flex,
   FormControl,
@@ -14,30 +12,34 @@ import {
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
 import { getSession, signIn } from "next-auth/react";
-
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const session = await getSession({ req });
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/userPage",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {},
-  };
-};
+import { useRouter } from "next/router";
+import { SyntheticEvent, useState } from "react";
 
 export default function Home() {
-  function handleSignIn() {
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userPassword, setUserPassword] = useState<string>("");
+
+  const router = useRouter();
+
+  // login with github
+  function handleGit() {
     signIn("github");
+  }
+  async function handleSubmit(event: SyntheticEvent) {
+    event.preventDefault();
+    // validate credentials
+    const userValidate = await signIn("credentials", {
+      userEmail,
+      userPassword,
+      redirect: false,
+    });
+
+    userValidate
+      ? router.push("userPage")
+      : alert("Email or password is invalid");
   }
 
   return (
-    //<ChakraProvider>
     <Flex minH="100vh" align="center" justify="center" bg="gray.800">
       <Stack spacing="8" mx="auto" minW="500px" py="12" px="6">
         <Stack align="center">
@@ -55,14 +57,22 @@ export default function Home() {
           height="400px"
           mb="200px"
         >
-          <Stack spacing="4">
+          <form onSubmit={handleSubmit}>
             <FormControl id="email">
               <FormLabel>Email address</FormLabel>
-              <Input type="email" border="1px solid black" />
+              <Input
+                type="email"
+                border="1px solid black"
+                onChange={(e) => setUserEmail(e.target.value)}
+              />
             </FormControl>
             <FormControl id="password">
-              <FormLabel>Password</FormLabel>
-              <Input type="password" border="1px solid black" />
+              <FormLabel mt="4">Password</FormLabel>
+              <Input
+                type="password"
+                border="1px solid black"
+                onChange={(e) => setUserPassword(e.target.value)}
+              />
             </FormControl>
             <Stack spacing="2">
               <Button
@@ -72,6 +82,7 @@ export default function Home() {
                 _hover={{
                   bg: "gray.700",
                 }}
+                type="submit"
               >
                 Sign in
               </Button>
@@ -82,7 +93,7 @@ export default function Home() {
                 _hover={{
                   bg: "gray.700",
                 }}
-                onClick={handleSignIn}
+                onClick={handleGit}
               >
                 Sign in with github
               </Button>
@@ -97,10 +108,24 @@ export default function Home() {
                 Don't have an account ? Click here
               </Link>
             </Stack>
-          </Stack>
+          </form>
         </Box>
       </Stack>
     </Flex>
-    //</ChakraProvider>
   );
 }
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const session = await getSession({ req });
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/userPage",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+};

@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   ChakraProvider,
-  Link,
   Flex,
   FormControl,
   FormLabel,
@@ -24,7 +23,7 @@ export default function Register() {
 
   async function handleCreateUser(event: FormEvent) {
     event.preventDefault();
-
+    // respose user create
     await fetch("http://localhost:3000/api/users/createUser", {
       method: "POST",
       body: JSON.stringify({
